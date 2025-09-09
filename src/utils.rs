@@ -1,3 +1,7 @@
+use std::fs::OpenOptions;
+use std::io::Write;
+use std::time::{SystemTime, UNIX_EPOCH};
+
 pub fn parse_board_header(line: &str) -> Option<(usize, usize)> {
     if let Some(dimensions) = line.strip_prefix("Anfield ") {
         if let Some(colon_pos) = dimensions.find(':') {
@@ -26,4 +30,14 @@ fn parse_piece_header(line: &str) -> Option<(usize, usize)> {
         }
     }
     None
+}
+
+fn log_to_file(filename: &str, message: &str) {
+    if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(filename) {
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis();
+        writeln!(file, "[{}] {}", timestamp, message).ok();
+    }
 }
