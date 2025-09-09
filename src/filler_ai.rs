@@ -32,4 +32,8 @@ impl FillerAi {
         self.board_height = height;
         self.board = board;
     }
+
+    pub fn update_piece(&mut self, piece: Piece) {
+        self.current_piece = piece;
+    }
 }
