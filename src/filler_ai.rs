@@ -27,4 +27,9 @@ impl FillerAi {
             current_piece: Piece::new(0, 0, Vec::new()),
         }
     }
+    pub fn update_board(&mut self, width: usize, height: usize, board: Vec<Vec<char>>) {
+        self.board_width = width;
+        self.board_height = height;
+        self.board = board;
+    }
 }
