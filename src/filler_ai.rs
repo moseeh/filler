@@ -14,3 +14,17 @@ pub struct FillerAi {
     // Piece info
     pub current_piece: Piece,
 }
+impl FillerAi {
+    pub fn new(my_player_number: u8) -> Self {
+        let opponent_number = if my_player_number == 1 { 2 } else { 1 };
+
+        Self {
+            board_width: 0,
+            board_height: 0,
+            board: Vec::new(),
+            my_player: Player::new(my_player_number),
+            opponent_player: Player::new(opponent_number),
+            current_piece: Piece::new(0, 0, Vec::new()),
+        }
+    }
+}
