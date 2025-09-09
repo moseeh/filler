@@ -3,22 +3,10 @@ mod piece;
 mod player;
 mod utils;
 
-use std::fs::OpenOptions;
-use std::io::{self, BufRead, Write};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::io::{self, BufRead};
 
 use crate::filler_ai::FillerAi;
 use crate::utils::*;
-
-fn log_to_file(filename: &str, message: &str) {
-    if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(filename) {
-        let timestamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis();
-        writeln!(file, "[{}] {}", timestamp, message).ok();
-    }
-}
 
 fn main() {
     std::fs::write("game_input.log", "").ok();
@@ -48,6 +36,7 @@ fn main() {
                         }
                     }
                     ai.update_board(width, height, board);
+
                 }
             }
         }
