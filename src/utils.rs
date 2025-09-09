@@ -17,7 +17,7 @@ pub fn parse_board_header(line: &str) -> Option<(usize, usize)> {
     None
 }
 
-fn parse_piece_header(line: &str) -> Option<(usize, usize)> {
+pub fn parse_piece_header(line: &str) -> Option<(usize, usize)> {
     if let Some(dimensions) = line.strip_prefix("Piece ") {
         if let Some(colon_pos) = dimensions.find(':') {
             let dims = &dimensions[..colon_pos];
@@ -32,7 +32,7 @@ fn parse_piece_header(line: &str) -> Option<(usize, usize)> {
     None
 }
 
-fn log_to_file(filename: &str, message: &str) {
+pub fn log_to_file(filename: &str, message: &str) {
     if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(filename) {
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
