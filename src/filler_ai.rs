@@ -1,4 +1,4 @@
-use crate::piece::Piece;
+use crate::piece::{self, Piece};
 use crate::player::Player;
 
 // AI struct that manages game state for the Filler game
@@ -43,4 +43,54 @@ impl FillerAi {
     pub fn update_piece(&mut self, piece: Piece) {
         self.current_piece = piece;
     }
+
+   pub fn find_best_move(&self) -> Option<(usize, usize)> {
+    for y in 0..self.board_height {
+        'outer: for x in 0..self.board_width {
+            let mut cell_overlap_count = 0;
+            
+            // Check each solid cell in the piece
+            for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
+                for (piece_x, piece_char) in piece_row.iter().enumerate() {
+                    if *piece_char == '.' {
+                        continue; // Skip empty piece cells
+                    }
+                    
+                    // Calculate where this piece cell would land on board
+                    let board_x = x + piece_x;
+                    let board_y = y + piece_y;
+                    
+                    // Check bounds
+                    if board_x >= self.board_width || board_y >= self.board_height {
+                        continue 'outer;
+                    }
+                    
+                    let board_cell = self.board[board_y][board_x];
+                    
+                    // Check opponent collision
+                    if board_cell == self.opponent_player.last_placed_symbol
+                        || board_cell == self.opponent_player.territory_symbol {
+                        continue 'outer;
+                    }
+                    
+                    // Count overlaps with my territory
+                    if board_cell == self.my_player.last_placed_symbol
+                        || board_cell == self.my_player.territory_symbol {
+                        cell_overlap_count += 1;
+                        if cell_overlap_count > 1 {
+                            continue 'outer;
+                        }
+                    }
+                }
+            }
+            
+            // Valid placement if exactly one overlap
+            if cell_overlap_count == 1 {
+                return Some((x, y));
+            }
+        }
+    }
+    
+    None
+}
 }
