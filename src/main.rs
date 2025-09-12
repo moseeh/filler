@@ -95,13 +95,19 @@ fn main() {
 
                             // Make a move (placeholder logic for now)
                             log_to_file("ai_decisions.log", "Calculating move...");
-                            let move_x = 4;
-                            let move_y = 3;
-                            log_to_file(
-                                "ai_decisions.log",
-                                &format!("Making move: {} {}", move_x, move_y),
-                            );
-                            println!("{} {}", move_x, move_y);
+                            if let Some((move_x, move_y)) = ai.find_best_move() {
+                                log_to_file(
+                                    "ai_decisions.log",
+                                    &format!("Making move: {} {}", move_x, move_y),
+                                );
+                                println!("{} {}", move_x, move_y);
+                            } else {
+                                log_to_file(
+                                    "ai_decisions.log",
+                                    "No best move found for this piece",
+                                );
+                                println!("0 0");
+                            }
                         }
                     }
                 } else {
