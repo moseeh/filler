@@ -95,8 +95,8 @@ fn main() {
 
                             // Make a move (placeholder logic for now)
                             log_to_file("ai_decisions.log", "Calculating move...");
-                            let move_x = 5;
-                            let move_y = 5;
+                            let move_x = 4;
+                            let move_y = 3;
                             log_to_file(
                                 "ai_decisions.log",
                                 &format!("Making move: {} {}", move_x, move_y),
