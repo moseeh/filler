@@ -50,7 +50,7 @@ fn main() {
 
                     // Parse board data
                     let mut board = Vec::new();
-                    for row_idx in 0..height {
+                    for _ in 0..height {
                         if let Some(Ok(board_row)) = lines.next() {
                             log_to_file("game_input.log", &board_row);
 
