@@ -182,4 +182,32 @@ impl FillerAi {
 
         min_distance
     }
+
+    // Find minimum distance from any of my new piece positions to any of my latest positions
+    fn min_distance_to_my_latest(
+        &self,
+        placement_x: usize,
+        placement_y: usize,
+        my_positions: &[(usize, usize)],
+    ) -> f64 {
+        if my_positions.is_empty() {
+            return f64::INFINITY;
+        }
+
+        let my_solid_positions = self.get_piece_solid_positions(placement_x, placement_y);
+        let mut min_distance = f64::INFINITY;
+
+        for new_pos in &my_solid_positions {
+            for latest_pos in my_positions {
+                let distance = self.euclidean_distance(*new_pos, *latest_pos);
+                if distance < min_distance {
+                    min_distance = distance;
+                }
+            }
+        }
+
+        min_distance
+    }
+
+    
 }
