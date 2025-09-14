@@ -156,4 +156,30 @@ impl FillerAi {
 
         solid_positions
     }
+
+    // Find minimum distance from any of my new piece positions to any opponent latest positions
+    fn min_distance_to_opponent_latest(
+        &self,
+        placement_x: usize,
+        placement_y: usize,
+        opponent_positions: &[(usize, usize)],
+    ) -> f64 {
+        if opponent_positions.is_empty() {
+            return f64::INFINITY;
+        }
+
+        let my_solid_positions = self.get_piece_solid_positions(placement_x, placement_y);
+        let mut min_distance = f64::INFINITY;
+
+        for my_pos in &my_solid_positions {
+            for opp_pos in opponent_positions {
+                let distance = self.euclidean_distance(*my_pos, *opp_pos);
+                if distance < min_distance {
+                    min_distance = distance;
+                }
+            }
+        }
+
+        min_distance
+    }
 }
