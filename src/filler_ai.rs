@@ -128,4 +128,11 @@ impl FillerAi {
 
         positions
     }
+
+    // Calculate Euclidean distance between two points
+    fn euclidean_distance(&self, pos1: (usize, usize), pos2: (usize, usize)) -> f64 {
+        let dx = (pos1.0 as f64) - (pos2.0 as f64);
+        let dy = (pos1.1 as f64) - (pos2.1 as f64);
+        (dx * dx + dy * dy).sqrt()
+    }
 }
