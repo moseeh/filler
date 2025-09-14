@@ -2,12 +2,14 @@ mod filler_ai;
 mod piece;
 mod player;
 mod utils;
+mod visualizer;  
 
 use std::io::{self, BufRead};
 
 use crate::filler_ai::FillerAi;
 use crate::piece::*;
 use crate::utils::*;
+
 
 fn main() {
     std::fs::write("game_input.log", "").ok();
