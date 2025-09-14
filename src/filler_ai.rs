@@ -99,5 +99,18 @@ impl FillerAi {
         valid_moves
     }
 
-    
+    // Find opponent's latest piece positions
+    fn find_opponent_latest_positions(&self) -> Vec<(usize, usize)> {
+        let mut positions = Vec::new();
+
+        for (y, row) in self.board.iter().enumerate() {
+            for (x, &cell) in row.iter().enumerate() {
+                if cell == self.opponent_player.last_placed_symbol {
+                    positions.push((x, y));
+                }
+            }
+        }
+
+        positions
+    }
 }
