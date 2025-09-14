@@ -113,4 +113,19 @@ impl FillerAi {
 
         positions
     }
+
+    // Find my latest piece positions
+    fn find_my_latest_positions(&self) -> Vec<(usize, usize)> {
+        let mut positions = Vec::new();
+
+        for (y, row) in self.board.iter().enumerate() {
+            for (x, &cell) in row.iter().enumerate() {
+                if cell == self.my_player.last_placed_symbol {
+                    positions.push((x, y));
+                }
+            }
+        }
+
+        positions
+    }
 }
