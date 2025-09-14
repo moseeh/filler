@@ -135,4 +135,25 @@ impl FillerAi {
         let dy = (pos1.1 as f64) - (pos2.1 as f64);
         (dx * dx + dy * dy).sqrt()
     }
+
+    // Get all positions where this placement would put solid piece cells
+    fn get_piece_solid_positions(
+        &self,
+        placement_x: usize,
+        placement_y: usize,
+    ) -> Vec<(usize, usize)> {
+        let mut solid_positions = Vec::new();
+
+        for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
+            for (piece_x, piece_char) in piece_row.iter().enumerate() {
+                if *piece_char != '.' {
+                    let board_x = placement_x + piece_x;
+                    let board_y = placement_y + piece_y;
+                    solid_positions.push((board_x, board_y));
+                }
+            }
+        }
+
+        solid_positions
+    }
 }
