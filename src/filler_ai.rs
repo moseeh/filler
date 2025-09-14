@@ -209,5 +209,55 @@ impl FillerAi {
         min_distance
     }
 
-    
+    pub fn find_best_move(&self) -> Option<(usize, usize)> {
+        let valid_moves = self.find_all_valid_placements();
+
+        if valid_moves.is_empty() {
+            return None;
+        }
+
+        // Strategy: Latest vs Latest aggressive approach with fallback
+        let opponent_latest = self.find_opponent_latest_positions();
+
+        if !opponent_latest.is_empty() {
+            // Primary strategy: Move toward opponent's latest piece
+            let mut best_move = None;
+            let mut closest_distance = f64::INFINITY;
+
+            for &(x, y) in &valid_moves {
+                let distance = self.min_distance_to_opponent_latest(x, y, &opponent_latest);
+                if distance < closest_distance {
+                    closest_distance = distance;
+                    best_move = Some((x, y));
+                }
+            }
+
+            if let Some(move_pos) = best_move {
+                return Some(move_pos);
+            }
+        }
+
+        // Fallback strategy: Move close to my latest piece
+        let my_latest = self.find_my_latest_positions();
+
+        if !my_latest.is_empty() {
+            let mut best_move = None;
+            let mut closest_distance = f64::INFINITY;
+
+            for &(x, y) in &valid_moves {
+                let distance = self.min_distance_to_my_latest(x, y, &my_latest);
+                if distance < closest_distance {
+                    closest_distance = distance;
+                    best_move = Some((x, y));
+                }
+            }
+
+            if let Some(move_pos) = best_move {
+                return Some(move_pos);
+            }
+        }
+
+        // Ultimate fallback: Just return first valid move
+        Some(valid_moves[0])
+    }
 }
