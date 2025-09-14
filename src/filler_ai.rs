@@ -1,5 +1,6 @@
-use crate::piece::{self, Piece};
+use crate::piece::Piece;
 use crate::player::Player;
+use crate::visualizer::get_visualizer;
 
 // AI struct that manages game state for the Filler game
 // Contains board data, player information, and current piece details
@@ -35,7 +36,10 @@ impl FillerAi {
     pub fn update_board(&mut self, width: usize, height: usize, board: Vec<Vec<char>>) {
         self.board_width = width;
         self.board_height = height;
-        self.board = board;
+        self.board = board.clone();
+
+        // Update visualizer with new board state
+        get_visualizer().update_board(width, height, board);
     }
 
     // Updates the current piece that the AI needs to place
