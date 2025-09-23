@@ -40,6 +40,10 @@ impl FillerAi {
         self.board_width = width;
         self.board_height = height;
         self.board = board.clone();
+        
+        // Initialize heat map
+        self.heat_map = vec![vec![0; width]; height];
+        self.generate_heat_map();
 
         // Update visualizer with new board state
         get_visualizer().update_board(width, height, board);
@@ -49,6 +53,55 @@ impl FillerAi {
     // Replaces the existing piece with the new piece data
     pub fn update_piece(&mut self, piece: Piece) {
         self.current_piece = piece;
+    }
+
+    // Generate heat map based on distance to opponent territory
+    fn generate_heat_map(&mut self) {
+        // Reset heat map
+        for row in &mut self.heat_map {
+            for cell in row.iter_mut() {
+                *cell = 0;
+            }
+        }
+
+        // Find all opponent positions
+        let mut opponent_positions = Vec::new();
+        for y in 0..self.board_height {
+            for x in 0..self.board_width {
+                let cell = self.board[y][x];
+                if cell == self.opponent_player.territory_symbol 
+                    || cell == self.opponent_player.last_placed_symbol {
+                    opponent_positions.push((x, y));
+                }
+            }
+        }
+
+        if opponent_positions.is_empty() {
+            return;
+        }
+
+        // Calculate heat for each cell based on Manhattan distance to nearest opponent
+        for y in 0..self.board_height {
+            for x in 0..self.board_width {
+                // Skip cells already occupied
+                let cell = self.board[y][x];
+                if cell != '.' {
+                    continue;
+                }
+
+                // Find minimum Manhattan distance to any opponent cell
+                let mut min_distance = i32::MAX;
+                for &(opp_x, opp_y) in &opponent_positions {
+                    let manhattan_dist = (x as i32 - opp_x as i32).abs() + (y as i32 - opp_y as i32).abs();
+                    min_distance = min_distance.min(manhattan_dist);
+                }
+
+                // Higher heat = closer to opponent (inverted distance)
+                // Use max possible distance minus actual distance for heat value
+                let max_possible_dist = (self.board_width + self.board_height) as i32;
+                self.heat_map[y][x] = max_possible_dist - min_distance;
+            }
+        }
     }
 
     // Find all valid placements for current piece
