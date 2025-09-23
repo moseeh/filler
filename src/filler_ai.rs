@@ -272,48 +272,25 @@ impl FillerAi {
             return None;
         }
 
-        // Strategy: Latest vs Latest aggressive approach with fallback
-        let opponent_latest = self.find_opponent_latest_positions();
+        let mut best_move = None;
+        let mut best_score = i32::MIN;
 
-        if !opponent_latest.is_empty() {
-            // Primary strategy: Move toward opponent's latest piece
-            let mut best_move = None;
-            let mut closest_distance = f64::INFINITY;
-
-            for &(x, y) in &valid_moves {
-                let distance = self.min_distance_to_opponent_latest(x, y, &opponent_latest);
-                if distance < closest_distance {
-                    closest_distance = distance;
-                    best_move = Some((x, y));
-                }
-            }
-
-            if let Some(move_pos) = best_move {
-                return Some(move_pos);
+        for &(x, y) in &valid_moves {
+            // Multi-factor scoring system
+            let heat_score = self.calculate_heat_score(x, y);
+            let blocking_score = self.calculate_blocking_score(x, y);
+            let expansion_score = self.calculate_expansion_score(x, y);
+            
+            // Weighted combination of different strategies
+            // Heat map (aggressive approach to opponent) gets highest weight
+            let total_score = heat_score * 100 + blocking_score * 50 + expansion_score * 10;
+            
+            if total_score > best_score {
+                best_score = total_score;
+                best_move = Some((x, y));
             }
         }
 
-        // Fallback strategy: Move close to my latest piece
-        let my_latest = self.find_my_latest_positions();
-
-        if !my_latest.is_empty() {
-            let mut best_move = None;
-            let mut closest_distance = f64::INFINITY;
-
-            for &(x, y) in &valid_moves {
-                let distance = self.min_distance_to_my_latest(x, y, &my_latest);
-                if distance < closest_distance {
-                    closest_distance = distance;
-                    best_move = Some((x, y));
-                }
-            }
-
-            if let Some(move_pos) = best_move {
-                return Some(move_pos);
-            }
-        }
-
-        // Ultimate fallback: Just return first valid move
-        Some(valid_moves[0])
+        best_move.or_else(|| Some(valid_moves[0]))
     }
 }
