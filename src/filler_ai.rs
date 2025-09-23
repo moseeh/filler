@@ -15,7 +15,7 @@ pub struct FillerAi {
     // Piece info
     pub current_piece: Piece,
     // Heat map for strategic placement
-    heat_map: Vec<Vec<i32>>,
+    pub heat_map: Vec<Vec<i32>>,
 }
 
 impl FillerAi {
@@ -56,7 +56,7 @@ impl FillerAi {
     }
 
     // Generate heat map based on distance to opponent territory
-    fn generate_heat_map(&mut self) {
+    pub fn generate_heat_map(&mut self) {
         // Reset heat map
         for row in &mut self.heat_map {
             for cell in row.iter_mut() {
@@ -107,7 +107,7 @@ impl FillerAi {
     }
 
     // Find all valid placements for current piece
-    fn find_all_valid_placements(&self) -> Vec<(usize, usize)> {
+    pub fn find_all_valid_placements(&self) -> Vec<(usize, usize)> {
         let mut valid_moves = Vec::new();
 
         for y in 0..self.board_height {
@@ -162,7 +162,7 @@ impl FillerAi {
     }
 
     // Calculate heat score for a placement based on heat map
-    fn calculate_heat_score(&self, placement_x: usize, placement_y: usize) -> i32 {
+    pub fn calculate_heat_score(&self, placement_x: usize, placement_y: usize) -> i32 {
         let mut total_heat = 0;
         let mut solid_cells = 0;
 
@@ -188,7 +188,7 @@ impl FillerAi {
     }
 
     // Simple blocking strategy: prefer positions near opponent
-    fn calculate_blocking_score(&self, placement_x: usize, placement_y: usize) -> i32 {
+    pub fn calculate_blocking_score(&self, placement_x: usize, placement_y: usize) -> i32 {
         let mut blocking_score = 0;
 
         for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
@@ -234,7 +234,7 @@ impl FillerAi {
     }
 
     // Calculate how many empty cells this placement opens up
-    fn calculate_expansion_score(&self, placement_x: usize, placement_y: usize) -> i32 {
+    pub fn calculate_expansion_score(&self, placement_x: usize, placement_y: usize) -> i32 {
         let mut expansion_score = 0;
 
         for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
@@ -277,7 +277,7 @@ impl FillerAi {
     }
 
     // NEW: Evaluate piece size efficiency - prioritize larger impact pieces
-    fn calculate_piece_efficiency(&self, placement_x: usize, placement_y: usize) -> i32 {
+    pub fn calculate_piece_efficiency(&self, placement_x: usize, placement_y: usize) -> i32 {
         let mut solid_count = 0;
 
         for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
