@@ -159,34 +159,26 @@ impl FillerAi {
         valid_moves
     }
 
-    // Find opponent's latest piece positions
-    fn find_opponent_latest_positions(&self) -> Vec<(usize, usize)> {
-        let mut positions = Vec::new();
+    // Calculate heat score for a placement based on heat map
+    fn calculate_heat_score(&self, placement_x: usize, placement_y: usize) -> i32 {
+        let mut total_heat = 0;
+        let mut solid_cells = 0;
 
-        for (y, row) in self.board.iter().enumerate() {
-            for (x, &cell) in row.iter().enumerate() {
-                if cell == self.opponent_player.last_placed_symbol {
-                    positions.push((x, y));
+        for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
+            for (piece_x, piece_char) in piece_row.iter().enumerate() {
+                if *piece_char != '.' {
+                    let board_x = placement_x + piece_x;
+                    let board_y = placement_y + piece_y;
+
+                    if board_x < self.board_width && board_y < self.board_height {
+                        total_heat += self.heat_map[board_y][board_x];
+                        solid_cells += 1;
+                    }
                 }
             }
         }
 
-        positions
-    }
-
-    // Find my latest piece positions
-    fn find_my_latest_positions(&self) -> Vec<(usize, usize)> {
-        let mut positions = Vec::new();
-
-        for (y, row) in self.board.iter().enumerate() {
-            for (x, &cell) in row.iter().enumerate() {
-                if cell == self.my_player.last_placed_symbol {
-                    positions.push((x, y));
-                }
-            }
-        }
-
-        positions
+        if solid_cells == 0 { 0 } else { total_heat / solid_cells }
     }
 
     // Calculate Euclidean distance between two points
