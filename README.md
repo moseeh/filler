@@ -72,7 +72,7 @@ cargo build --release
 
 ### Setting up the Game Environment
 
-1. Download and extract the provided docker_image folder
+1. Download and extract the provided docker_image folder [here](https://assets.01-edu.org/filler/filler.zip)
 2. Build the Docker image:
 ```bash
 cd docker_image
