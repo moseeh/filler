@@ -40,7 +40,7 @@ impl FillerAi {
         self.board_width = width;
         self.board_height = height;
         self.board = board.clone();
-        
+
         // Initialize heat map
         self.heat_map = vec![vec![0; width]; height];
         self.generate_heat_map();
@@ -69,8 +69,9 @@ impl FillerAi {
         for y in 0..self.board_height {
             for x in 0..self.board_width {
                 let cell = self.board[y][x];
-                if cell == self.opponent_player.territory_symbol 
-                    || cell == self.opponent_player.last_placed_symbol {
+                if cell == self.opponent_player.territory_symbol
+                    || cell == self.opponent_player.last_placed_symbol
+                {
                     opponent_positions.push((x, y));
                 }
             }
@@ -92,7 +93,8 @@ impl FillerAi {
                 // Find minimum Manhattan distance to any opponent cell
                 let mut min_distance = i32::MAX;
                 for &(opp_x, opp_y) in &opponent_positions {
-                    let manhattan_dist = (x as i32 - opp_x as i32).abs() + (y as i32 - opp_y as i32).abs();
+                    let manhattan_dist =
+                        (x as i32 - opp_x as i32).abs() + (y as i32 - opp_y as i32).abs();
                     min_distance = min_distance.min(manhattan_dist);
                 }
 
@@ -178,45 +180,50 @@ impl FillerAi {
             }
         }
 
-        if solid_cells == 0 { 0 } else { total_heat / solid_cells }
+        if solid_cells == 0 {
+            0
+        } else {
+            total_heat / solid_cells
+        }
     }
 
-    // Advanced blocking strategy: Try to cut off opponent expansion paths
+    // Simple blocking strategy: prefer positions near opponent
     fn calculate_blocking_score(&self, placement_x: usize, placement_y: usize) -> i32 {
         let mut blocking_score = 0;
 
-        // Get positions where this piece would be placed
-        let mut piece_positions = Vec::new();
         for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
             for (piece_x, piece_char) in piece_row.iter().enumerate() {
                 if *piece_char != '.' {
                     let board_x = placement_x + piece_x;
                     let board_y = placement_y + piece_y;
-                    if board_x < self.board_width && board_y < self.board_height {
-                        piece_positions.push((board_x, board_y));
-                    }
-                }
-            }
-        }
 
-        // Check how many opponent expansion paths this placement would block
-        for &(px, py) in &piece_positions {
-            // Check surrounding cells for potential opponent expansion
-            for dy in -2..=2i32 {
-                for dx in -2..=2i32 {
-                    let check_x = px as i32 + dx;
-                    let check_y = py as i32 + dy;
-                    
-                    if check_x >= 0 && check_x < self.board_width as i32 
-                        && check_y >= 0 && check_y < self.board_height as i32 {
-                        let check_x = check_x as usize;
-                        let check_y = check_y as usize;
-                        let cell = self.board[check_y][check_x];
-                        
-                        // If there's an opponent piece nearby, this placement blocks their expansion
-                        if cell == self.opponent_player.last_placed_symbol
-                            || cell == self.opponent_player.territory_symbol {
-                            blocking_score += (3 - dx.abs().max(dy.abs())); // Closer = higher score
+                    if board_x < self.board_width && board_y < self.board_height {
+                        // Check immediate surrounding for opponent pieces
+                        for dy in -1..=1i32 {
+                            for dx in -1..=1i32 {
+                                if dx == 0 && dy == 0 {
+                                    continue;
+                                }
+
+                                let check_x = board_x as i32 + dx;
+                                let check_y = board_y as i32 + dy;
+
+                                if check_x >= 0
+                                    && check_x < self.board_width as i32
+                                    && check_y >= 0
+                                    && check_y < self.board_height as i32
+                                {
+                                    let check_x = check_x as usize;
+                                    let check_y = check_y as usize;
+                                    let cell = self.board[check_y][check_x];
+
+                                    if cell == self.opponent_player.last_placed_symbol
+                                        || cell == self.opponent_player.territory_symbol
+                                    {
+                                        blocking_score += 5; // Simple proximity bonus
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -226,31 +233,35 @@ impl FillerAi {
         blocking_score
     }
 
-    // Territory expansion strategy: Prefer moves that expand our territory efficiently
+    // Calculate how many empty cells this placement opens up
     fn calculate_expansion_score(&self, placement_x: usize, placement_y: usize) -> i32 {
         let mut expansion_score = 0;
-        
-        // Count how many new empty cells this piece would be adjacent to
+
         for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
             for (piece_x, piece_char) in piece_row.iter().enumerate() {
                 if *piece_char != '.' {
                     let board_x = placement_x + piece_x;
                     let board_y = placement_y + piece_y;
-                    
+
                     if board_x < self.board_width && board_y < self.board_height {
                         // Check adjacent cells for expansion potential
                         for dy in -1..=1i32 {
                             for dx in -1..=1i32 {
-                                if dx == 0 && dy == 0 { continue; }
-                                
+                                if dx == 0 && dy == 0 {
+                                    continue;
+                                }
+
                                 let adj_x = board_x as i32 + dx;
                                 let adj_y = board_y as i32 + dy;
-                                
-                                if adj_x >= 0 && adj_x < self.board_width as i32
-                                    && adj_y >= 0 && adj_y < self.board_height as i32 {
+
+                                if adj_x >= 0
+                                    && adj_x < self.board_width as i32
+                                    && adj_y >= 0
+                                    && adj_y < self.board_height as i32
+                                {
                                     let adj_x = adj_x as usize;
                                     let adj_y = adj_y as usize;
-                                    
+
                                     if self.board[adj_y][adj_x] == '.' {
                                         expansion_score += 1;
                                     }
@@ -261,8 +272,28 @@ impl FillerAi {
                 }
             }
         }
-        
+
         expansion_score
+    }
+
+    // NEW: Evaluate piece size efficiency - prioritize larger impact pieces
+    fn calculate_piece_efficiency(&self, placement_x: usize, placement_y: usize) -> i32 {
+        let mut solid_count = 0;
+
+        for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
+            for (piece_x, piece_char) in piece_row.iter().enumerate() {
+                if *piece_char != '.' {
+                    let board_x = placement_x + piece_x;
+                    let board_y = placement_y + piece_y;
+
+                    if board_x < self.board_width && board_y < self.board_height {
+                        solid_count += 1;
+                    }
+                }
+            }
+        }
+
+        solid_count * 2 // Bonus for placing larger pieces
     }
 
     pub fn find_best_move(&self) -> Option<(usize, usize)> {
@@ -276,15 +307,18 @@ impl FillerAi {
         let mut best_score = i32::MIN;
 
         for &(x, y) in &valid_moves {
-            // Multi-factor scoring system
+            // Simplified, focused scoring - heat map is primary strategy
             let heat_score = self.calculate_heat_score(x, y);
             let blocking_score = self.calculate_blocking_score(x, y);
             let expansion_score = self.calculate_expansion_score(x, y);
-            
-            // Weighted combination of different strategies
-            // Heat map (aggressive approach to opponent) gets highest weight
-            let total_score = heat_score * 100 + blocking_score * 50 + expansion_score * 10;
-            
+            let efficiency_score = self.calculate_piece_efficiency(x, y);
+
+            // Heat map dominates with high weight, others provide fine-tuning
+            let total_score = heat_score * 100   // Primary: aggressive positioning
+                + blocking_score * 20            // Secondary: block opponent  
+                + expansion_score * 5            // Tertiary: maintain options
+                + efficiency_score * 10; // Bonus: piece size efficiency
+
             if total_score > best_score {
                 best_score = total_score;
                 best_move = Some((x, y));
