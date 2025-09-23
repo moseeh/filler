@@ -181,58 +181,49 @@ impl FillerAi {
         if solid_cells == 0 { 0 } else { total_heat / solid_cells }
     }
 
-    // Calculate Euclidean distance between two points
-    fn euclidean_distance(&self, pos1: (usize, usize), pos2: (usize, usize)) -> f64 {
-        let dx = (pos1.0 as f64) - (pos2.0 as f64);
-        let dy = (pos1.1 as f64) - (pos2.1 as f64);
-        (dx * dx + dy * dy).sqrt()
-    }
+    // Advanced blocking strategy: Try to cut off opponent expansion paths
+    fn calculate_blocking_score(&self, placement_x: usize, placement_y: usize) -> i32 {
+        let mut blocking_score = 0;
 
-    // Get all positions where this placement would put solid piece cells
-    fn get_piece_solid_positions(
-        &self,
-        placement_x: usize,
-        placement_y: usize,
-    ) -> Vec<(usize, usize)> {
-        let mut solid_positions = Vec::new();
-
+        // Get positions where this piece would be placed
+        let mut piece_positions = Vec::new();
         for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
             for (piece_x, piece_char) in piece_row.iter().enumerate() {
                 if *piece_char != '.' {
                     let board_x = placement_x + piece_x;
                     let board_y = placement_y + piece_y;
-                    solid_positions.push((board_x, board_y));
+                    if board_x < self.board_width && board_y < self.board_height {
+                        piece_positions.push((board_x, board_y));
+                    }
                 }
             }
         }
 
-        solid_positions
-    }
-
-    // Find minimum distance from any of my new piece positions to any opponent latest positions
-    fn min_distance_to_opponent_latest(
-        &self,
-        placement_x: usize,
-        placement_y: usize,
-        opponent_positions: &[(usize, usize)],
-    ) -> f64 {
-        if opponent_positions.is_empty() {
-            return f64::INFINITY;
-        }
-
-        let my_solid_positions = self.get_piece_solid_positions(placement_x, placement_y);
-        let mut min_distance = f64::INFINITY;
-
-        for my_pos in &my_solid_positions {
-            for opp_pos in opponent_positions {
-                let distance = self.euclidean_distance(*my_pos, *opp_pos);
-                if distance < min_distance {
-                    min_distance = distance;
+        // Check how many opponent expansion paths this placement would block
+        for &(px, py) in &piece_positions {
+            // Check surrounding cells for potential opponent expansion
+            for dy in -2..=2i32 {
+                for dx in -2..=2i32 {
+                    let check_x = px as i32 + dx;
+                    let check_y = py as i32 + dy;
+                    
+                    if check_x >= 0 && check_x < self.board_width as i32 
+                        && check_y >= 0 && check_y < self.board_height as i32 {
+                        let check_x = check_x as usize;
+                        let check_y = check_y as usize;
+                        let cell = self.board[check_y][check_x];
+                        
+                        // If there's an opponent piece nearby, this placement blocks their expansion
+                        if cell == self.opponent_player.last_placed_symbol
+                            || cell == self.opponent_player.territory_symbol {
+                            blocking_score += (3 - dx.abs().max(dy.abs())); // Closer = higher score
+                        }
+                    }
                 }
             }
         }
 
-        min_distance
+        blocking_score
     }
 
     // Find minimum distance from any of my new piece positions to any of my latest positions
