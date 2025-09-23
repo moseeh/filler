@@ -1,5 +1,6 @@
 // Represents a player in the Filler game with their identifying symbols
 // Stores player number and the characters used to mark their territory and placements
+#[allow(dead_code)]
 pub struct Player {
     pub number: u8,
     pub territory_symbol: char, // '@' or '$'

@@ -1,5 +1,6 @@
 // Represents a game piece with dimensions and a 2D character pattern
 // Used to store the shape and layout of pieces in the Filler game
+#[allow(dead_code)]
 pub struct Piece {
     pub width: usize,
     pub height: usize,
