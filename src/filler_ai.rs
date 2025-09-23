@@ -14,6 +14,8 @@ pub struct FillerAi {
     pub opponent_player: Player,
     // Piece info
     pub current_piece: Piece,
+    // Heat map for strategic placement
+    heat_map: Vec<Vec<i32>>,
 }
 
 impl FillerAi {
@@ -28,6 +30,7 @@ impl FillerAi {
             my_player: Player::new(my_player_number),
             opponent_player: Player::new(opponent_number),
             current_piece: Piece::new(0, 0, Vec::new()),
+            heat_map: Vec::new(),
         }
     }
 
