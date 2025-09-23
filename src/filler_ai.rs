@@ -226,30 +226,43 @@ impl FillerAi {
         blocking_score
     }
 
-    // Find minimum distance from any of my new piece positions to any of my latest positions
-    fn min_distance_to_my_latest(
-        &self,
-        placement_x: usize,
-        placement_y: usize,
-        my_positions: &[(usize, usize)],
-    ) -> f64 {
-        if my_positions.is_empty() {
-            return f64::INFINITY;
-        }
-
-        let my_solid_positions = self.get_piece_solid_positions(placement_x, placement_y);
-        let mut min_distance = f64::INFINITY;
-
-        for new_pos in &my_solid_positions {
-            for latest_pos in my_positions {
-                let distance = self.euclidean_distance(*new_pos, *latest_pos);
-                if distance < min_distance {
-                    min_distance = distance;
+    // Territory expansion strategy: Prefer moves that expand our territory efficiently
+    fn calculate_expansion_score(&self, placement_x: usize, placement_y: usize) -> i32 {
+        let mut expansion_score = 0;
+        
+        // Count how many new empty cells this piece would be adjacent to
+        for (piece_y, piece_row) in self.current_piece.pattern.iter().enumerate() {
+            for (piece_x, piece_char) in piece_row.iter().enumerate() {
+                if *piece_char != '.' {
+                    let board_x = placement_x + piece_x;
+                    let board_y = placement_y + piece_y;
+                    
+                    if board_x < self.board_width && board_y < self.board_height {
+                        // Check adjacent cells for expansion potential
+                        for dy in -1..=1i32 {
+                            for dx in -1..=1i32 {
+                                if dx == 0 && dy == 0 { continue; }
+                                
+                                let adj_x = board_x as i32 + dx;
+                                let adj_y = board_y as i32 + dy;
+                                
+                                if adj_x >= 0 && adj_x < self.board_width as i32
+                                    && adj_y >= 0 && adj_y < self.board_height as i32 {
+                                    let adj_x = adj_x as usize;
+                                    let adj_y = adj_y as usize;
+                                    
+                                    if self.board[adj_y][adj_x] == '.' {
+                                        expansion_score += 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
-
-        min_distance
+        
+        expansion_score
     }
 
     pub fn find_best_move(&self) -> Option<(usize, usize)> {
