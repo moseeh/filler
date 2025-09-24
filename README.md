@@ -4,35 +4,35 @@ An intelligent AI player for the Filler algorithmic game, developed as part of t
 
 ## Table of Contents
 
-- [About the Game](#about-the-game)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Building and Running](#building-and-running)
-- [Testing Against Bots](#testing-against-bots)
-- [Visualization (Optional)](#visualization-optional)
-- [Algorithm Strategy](#algorithm-strategy)
-- [Project Structure](#project-structure)
-- [Features](#features)
-- [Game Engine Flags](#game-engine-flags)
-- [Notes](#notes)
-- [Contributing](#contributing)
+* [About the Game](#about-the-game)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Building and Running](#building-and-running)
+* [Testing Against Bots](#testing-against-bots)
+* [Visualization (Optional)](#visualization-optional)
+* [Algorithm Strategy](#algorithm-strategy)
+* [Project Structure](#project-structure)
+* [Features](#features)
+* [Game Engine Flags](#game-engine-flags)
+* [Notes](#notes)
+* [Contributing](#contributing)
 
 ## About the Game
 
-Filler is a competitive algorithmic game where two players (bots) compete on a rectangular grid called the _Anfield_. Each player must place randomly generated pieces on the board with the constraint that exactly **one cell of the new piece must overlap with their existing territory**.
+Filler is a competitive algorithmic game where two players (bots) compete on a rectangular grid called the *Anfield*. Each player must place randomly generated pieces on the board with the constraint that exactly **one cell of the new piece must overlap with their existing territory**.
 
 ### Game Rules
 
-- Two players alternate turns placing pieces.
-- Each piece must overlap **exactly one cell** with the player's territory.
-- Players cannot overlap opponent pieces.
-- The game ends when a player cannot place a piece.
-- The player with the largest controlled area wins.
+* Two players alternate turns placing pieces.
+* Each piece must overlap **exactly one cell** with the player's territory.
+* Players cannot overlap opponent pieces.
+* The game ends when a player cannot place a piece.
+* The player with the largest controlled area wins.
 
 ### Player Symbols
 
-- **Player 1**: `@` (territory), `a` (last piece)
-- **Player 2**: `$` (territory), `s` (last piece)
+* **Player 1**: `@` (territory), `a` (last piece)
+* **Player 2**: `$` (territory), `s` (last piece)
 
 ## Installation
 
@@ -43,9 +43,15 @@ cd filler
 
 ### Prerequisites
 
-- **Rust** (latest stable, edition 2024)
-- **Docker** (for running the game engine)
-- **SDL2 (optional)** – only required for visualization
+* **Rust** (latest stable, edition 2024)
+* **Docker** (for running the game engine)
+* **musl target** (required for Docker builds)
+
+```bash
+rustup target add x86_64-unknown-linux-musl
+```
+
+* **SDL2 (optional)** – only required for visualization
 
 ### SDL2 Setup (Optional)
 
@@ -69,7 +75,7 @@ sudo apt-get install libsdl2-dev
 sudo pacman -S sdl2
 ```
 
-> ⚠️ SDL2 is optional. The AI works perfectly inside Docker without it.
+> SDL2 is optional. The AI works perfectly inside Docker without it.
 
 ## Usage
 
@@ -78,7 +84,7 @@ sudo pacman -S sdl2
 **For Docker (no visualization):**
 
 ```bash
-cargo build --release
+cargo build --release --target x86_64-unknown-linux-musl
 ```
 
 **For local development with visualization:**
@@ -90,6 +96,7 @@ cargo build --release --features visualizer
 ### Setting up the Game Environment
 
 1. Download and extract the [game engine package](https://assets.01-edu.org/filler/filler.zip)
+
 2. Build the Docker image:
 
    ```bash
@@ -107,13 +114,13 @@ cargo build --release --features visualizer
 
 ```bash
 # Against bender bot
-./game_engine -f maps/map01 -p1 solution/target/release/filler -p2 robots/bender
+./game_engine -f maps/map01 -p1 solution/filler -p2 robots/bender
 
 # Against terminator bot
-./game_engine -f maps/map01 -p1 solution/target/release/filler -p2 robots/terminator
+./game_engine -f maps/map01 -p1 solution/filler -p2 robots/terminator
 
 # Using different maps
-./game_engine -f maps/map02 -p1 solution/target/release/filler -p2 robots/terminator
+./game_engine -f maps/map02 -p1 solution/filler -p2 robots/terminator
 ```
 
 ## Building and Running
@@ -121,16 +128,18 @@ cargo build --release --features visualizer
 ### Recommended Build (Docker-Compatible)
 
 ```bash
-cargo build --release
+cargo build --release --target x86_64-unknown-linux-musl
 ```
 
-This produces an optimized binary at `target/release/filler` that runs inside Docker.
+This produces an optimized binary at `target/x86_64-unknown-linux-musl/release/filler` that runs inside Docker without GLIBC issues.
 
 ### Development Build with Visualization
 
 ```bash
 cargo build --release --features visualizer
 ```
+
+⚠️ Visualization builds require SDL2 and should only be run locally, **not inside Docker**.
 
 ### Running Tests
 
@@ -142,23 +151,23 @@ cargo test
 
 The AI generates logs automatically:
 
-- `game_input.log` → raw game engine input
-- `ai_decisions.log` → decision-making process
+* `game_input.log` → raw game engine input
+* `ai_decisions.log` → decision-making process
 
 ## Testing Against Bots
 
 ### Available Bots in Docker
 
-- **bender** (moderate difficulty)
-- **terminator** (hardest challenge)
-- Other bots included in engine package
+* **bender** (moderate difficulty)
+* **terminator** (hardest challenge)
+* Other bots included in engine package
 
 ### Batch Testing
 
 ```bash
 # Run 10 quiet games against terminator
 for i in {1..10}; do
-    ./game_engine -f maps/map01 -p1 solution/target/release/filler -p2 robots/terminator -q
+    ./game_engine -f maps/map01 -p1 solution/filler -p2 robots/terminator -q
 done
 ```
 
@@ -172,9 +181,9 @@ cargo build --release --features visualizer
 
 Visualization provides:
 
-- Real-time board updates
-- Color-coded territories
-- Smooth rendering independent of AI logic
+* Real-time board updates
+* Color-coded territories
+* Smooth rendering independent of AI logic
 
 ⚠️ Visualization is **not supported inside Docker** – only use it locally.
 
@@ -184,9 +193,9 @@ This AI uses a **multi-strategy weighted approach**:
 
 ### Heat Map Algorithm
 
-- Assigns values to cells based on distance to opponent.
-- **High heat** = close to opponent (aggressive).
-- **Low heat** = far from opponent.
+* Assigns values to cells based on distance to opponent.
+* **High heat** = close to opponent (aggressive).
+* **Low heat** = far from opponent.
 
 ### Weighted Scoring
 
@@ -201,9 +210,9 @@ Efficient `|x1 - x2| + |y1 - y2|` distance metric.
 
 ### Territory Control
 
-- Pushes toward opponent.
-- Cuts off expansion.
-- Balances growth vs. aggression.
+* Pushes toward opponent.
+* Cuts off expansion.
+* Balances growth vs. aggression.
 
 ## Project Structure
 
@@ -226,39 +235,41 @@ filler/
 
 ### Core
 
-- Heat map algorithm for strategy.
-- Multi-strategy scoring.
-- Logging and debugging tools.
-- Docker-compatible builds.
+* Heat map algorithm for strategy.
+* Multi-strategy scoring.
+* Logging and debugging tools.
+* Docker-compatible builds.
 
 ### Visualization (Optional)
 
-- Real-time graphics with SDL2.
-- Thread-safe non-blocking renderer.
+* Real-time graphics with SDL2.
+* Thread-safe non-blocking renderer.
 
 ### Debugging
 
-- Input/output logs.
-- Decision scoring details.
-- Handles edge cases gracefully.
+* Input/output logs.
+* Decision scoring details.
+* Handles edge cases gracefully.
 
 ## Game Engine Flags
 
-- `-f, -file string` → map file
-- `-p1, -player1 string` → player 1 AI
-- `-p2, -player2 string` → player 2 AI
-- `-q, -quiet` → quiet mode
-- `-s, -seed int` → random seed
-- `-t, -time int` → move timeout (default 10s)
-- `-r, -refresh` → refresh rate control
+* `-f, -file string` → map file
+* `-p1, -player1 string` → player 1 AI
+* `-p2, -player2 string` → player 2 AI
+* `-q, -quiet` → quiet mode
+* `-s, -seed int` → random seed
+* `-t, -time int` → move timeout (default 10s)
+* `-r, -refresh` → refresh rate control
 
 ## Notes
 
-- AI must always respond within timeout.
-- Invalid moves → immediate loss.
-- If no moves exist, return `0 0`.
-- Docker builds use **no default features**.
-- SDL2 is completely optional.
+* Always use the **musl target** (`--target x86_64-unknown-linux-musl`) for Docker to avoid GLIBC issues.
+* Visualization builds require SDL2 and should only be run locally, not in Docker.
+* AI must always respond within timeout.
+* Invalid moves → immediate loss.
+* If no moves exist, return `0 0`.
+* Docker builds use **no default features**.
+* SDL2 is completely optional.
 
 ## Contributing
 
