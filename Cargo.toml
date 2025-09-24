@@ -3,5 +3,9 @@ name = "filler"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = []
+visualizer = ["dep:sdl2"]
+
 [dependencies]
-sdl2 = "0.38.0"
+sdl2 = { version = "0.38.0", optional = true }
