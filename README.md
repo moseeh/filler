@@ -104,7 +104,7 @@ cargo build --release --features visualizer
    docker build -t filler .
    ```
 
-3. Run the container with your solution mounted:
+3. Run the container with your solution(the binary) mounted:
 
    ```bash
    docker run -v "$(pwd)/solution":/filler/solution -it filler
@@ -146,13 +146,6 @@ cargo build --release --features visualizer
 ```bash
 cargo test
 ```
-
-### Logging
-
-The AI generates logs automatically:
-
-* `game_input.log` → raw game engine input
-* `ai_decisions.log` → decision-making process
 
 ## Testing Against Bots
 
@@ -237,7 +230,6 @@ filler/
 
 * Heat map algorithm for strategy.
 * Multi-strategy scoring.
-* Logging and debugging tools.
 * Docker-compatible builds.
 
 ### Visualization (Optional)
@@ -245,11 +237,6 @@ filler/
 * Real-time graphics with SDL2.
 * Thread-safe non-blocking renderer.
 
-### Debugging
-
-* Input/output logs.
-* Decision scoring details.
-* Handles edge cases gracefully.
 
 ## Game Engine Flags
 
