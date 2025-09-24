@@ -1,5 +1,6 @@
 use crate::piece::Piece;
 use crate::player::Player;
+#[cfg(feature = "visualizer")]
 use crate::visualizer::get_visualizer;
 
 // AI struct that manages game state for the Filler game
@@ -36,6 +37,7 @@ impl FillerAi {
 
     // Updates the AI's internal board state with new dimensions and layout
     // Replaces the existing board data with the provided width, height, and grid
+
     pub fn update_board(&mut self, width: usize, height: usize, board: Vec<Vec<char>>) {
         self.board_width = width;
         self.board_height = height;
@@ -46,6 +48,7 @@ impl FillerAi {
         self.generate_heat_map();
 
         // Update visualizer with new board state
+        #[cfg(feature = "visualizer")]
         get_visualizer().update_board(width, height, board);
     }
 
