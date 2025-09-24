@@ -2,6 +2,7 @@ mod filler_ai;
 mod piece;
 mod player;
 mod utils;
+#[cfg(feature = "visualizer")]
 mod visualizer;  
 
 use std::io::{self, BufRead};
